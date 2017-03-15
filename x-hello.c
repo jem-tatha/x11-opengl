@@ -9,30 +9,41 @@ int main(void) {
    XEvent e;
    char *msg = "Hello, World!";
    int s;
- 
+	int screen_width, screen_height;
+	unsigned long white_pixel, black_pixel; 
+
    d = XOpenDisplay(NULL);
    if (d == NULL) {
       fprintf(stderr, "Cannot open display\n");
       exit(1);
    }
  
-   s = DefaultScreen(d);
-   w = XCreateSimpleWindow(d, RootWindow(d, s), 100, 100, 500,500, 1,
-                           777215, 111111);
-               printf("BlackPixel(d, s) is %d\n",(int)BlackPixel(d, s));
-               printf("WhitePixel(d, s) is %d\n",(int)WhitePixel(d, s));
-   XSelectInput(d, w, ExposureMask | KeyPressMask);
-   XMapWindow(d, w);
+   	s = DefaultScreen(d);
+	
+	{
+		screen_width = DisplayWidth(d, s);
+		screen_height = DisplayHeight(d, s);
+		white_pixel = WhitePixel(d, s);
+		black_pixel = BlackPixel(d, s);
+		printf("width = %d, height = %d, white_pixel = %ld, black_pixel = %ld\n",
+			screen_width, screen_height, white_pixel, black_pixel);
+	}
+
+	w = XCreateSimpleWindow(d, RootWindow(d, s), 
+								0, 0, screen_width, screen_height, 2,
+                           		black_pixel, white_pixel);
+   	XSelectInput(d, w, ExposureMask | KeyPressMask);
+   	XMapWindow(d, w);
  
-   while (1) {
-      XNextEvent(d, &e);
-      if (e.type == Expose) {
-         XFillRectangle(d, w, DefaultGC(d, s), 20, 20, 10, 10);
-         XDrawString(d, w, DefaultGC(d, s), 10, 50, msg, strlen(msg));
-      }
-      if (e.type == KeyPress)
-         break;
-   }
+	while (1) {
+		XNextEvent(d, &e);
+      	if (e.type == Expose) {
+        	XFillRectangle(d, w, DefaultGC(d, s), 0, 0, 100, 100);
+			XDrawString(d, w, DefaultGC(d, s), 120, 50, msg, strlen(msg));
+      	}
+      	if (e.type == KeyPress)
+         	break;
+   	}
  
    XCloseDisplay(d);
    return 0;
